@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración de Pedidos</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-200">
+    <div class="container mx-auto p-8">
+        <h1 class="text-3xl font-bold mb-6">Buscar Pedido por Folio</h1>
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <div class="flex space-x-4">
+                <input type="text" id="folio-input" placeholder="Introduce el folio (ej: PED-175...)" class="flex-grow p-2 border rounded-md uppercase">
+                <button id="search-btn" class="bg-blue-500 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-600">Buscar</button>
+            </div>
+            <div id="result-div" class="mt-6">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('search-btn').addEventListener('click', () => {
+            const folio = document.getElementById('folio-input').value.trim().toUpperCase();
+            const resultDiv = document.getElementById('result-div');
+            
+            if (!folio) {
+                resultDiv.innerHTML = `<p class="text-red-500">Por favor, introduce un folio.</p>`;
+                return;
+            }
+
+            // !! IMPORTANTE: Usa la misma URL base de tu servidor !!
+            const downloadUrl = `https://servidor-pedidos.onrender.com/pedidos_guardados/${folio}.xlsx`;
+
+            resultDiv.innerHTML = `
+                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                    <strong class="font-bold">¡Enlace de Descarga Generado!</strong>
+                    <p class="block sm:inline mt-2">Haz clic abajo para descargar el archivo Excel del folio ${folio}.</p>
+                    <p class="mt-4"><a href="${downloadUrl}" download class="bg-green-600 text-white font-bold py-2 px-4 rounded hover:bg-green-700">Descargar Archivo: ${folio}.xlsx</a></p>
+                </div>
+            `;
+        });
+
+        // Convertir a mayúsculas mientras se escribe
+        document.getElementById('folio-input').addEventListener('input', (e) => {
+            e.target.value = e.target.value.toUpperCase();
+        });
+    </script>
+</body>
+</html>
