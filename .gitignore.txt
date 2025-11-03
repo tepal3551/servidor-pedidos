@@ -1,3 +1,5 @@
-node_modules
-uploads
-pedidos_guardados
+# Ignorar todo
+*
+# PERO SÍ incluir estos dos archivos
+!consecutivo.txt
+!.gitignore
