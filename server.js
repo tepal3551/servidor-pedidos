@@ -1,4 +1,4 @@
-// Archivo: server.js (Versión v4.1 - Folio Numérico)
+// Archivo: server.js (Versión v4.2 - Rutas Absolutas de Render)
 
 const express = require('express');
 const cors = require('cors');
@@ -13,18 +13,28 @@ app.use(cors());
 app.use(express.json()); 
 
 // --- Lógica del Consecutivo y Carpetas ---
-const dataDir = path.join(__dirname, 'data');
-if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir);
-}
+// *** CAMBIO AQUÍ: Usamos la ruta absoluta del disco de Render ***
+const dataDir = '/data'; 
 const consecutivoFilePath = path.join(dataDir, 'consecutivo.txt');
+
+// *** CAMBIO AQUÍ: La carpeta 'uploads' estará DENTRO de '/data' ***
+const uploadDir = path.join(dataDir, 'uploads');
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir);
+}
+
+// *** CAMBIO AQUÍ: La carpeta 'pedidos_guardados' también estará DENTRO de '/data' ***
 const finalPathDir = path.join(dataDir, 'pedidos_guardados');
 if (!fs.existsSync(finalPathDir)) {
     fs.mkdirSync(finalPathDir);
 }
+
 app.use('/pedidos_guardados', express.static(finalPathDir));
 
-// --- Función para leer el consecutivo (MODIFICADA) ---
+// --- Configuración de Multer (para subir archivos) ---
+// (Esta parte se elimina porque ya no usamos multer para esta ruta)
+
+// --- Función para leer el consecutivo (sin cambios) ---
 function getNextFolio() {
     let currentFolio = 0;
     try {
@@ -39,12 +49,10 @@ function getNextFolio() {
         fs.writeFileSync(consecutivoFilePath, nextFolio.toString());
     } catch (e) { console.error("Error al guardar el consecutivo:", e); }
     
-    // *** CAMBIO AQUÍ: Ya no devuelve "PED-XXXX", solo el número. ***
-    // (Hemos quitado el .padStart() para que sea un número simple)
     return nextFolio.toString();
 }
 
-// --- Ruta MODIFICADA: Ahora usa el folio numérico ---
+// --- Ruta para crear el pedido (sin cambios) ---
 app.post('/api/crear-pedido', async (req, res) => {
     try {
         const { clientName, agentId, clientId, products } = req.body;
@@ -52,13 +60,11 @@ app.post('/api/crear-pedido', async (req, res) => {
             return res.status(400).json({ success: false, message: 'Datos del pedido incompletos.' });
         }
 
-        // 1. Generar el Folio Consecutivo (ahora es solo numérico)
         const folio = getNextFolio(); 
         const date = new Date().toLocaleDateString('es-ES');
 
-        // 2. Crear el Excel con el formato ERP
         const dataParaExcel = products.map(p => ({
-            no_ped: folio, // Escribimos el folio numérico en el Excel
+            no_ped: folio,
             f_alta_ped: date,
             cve_cte: clientId,
             cve_age: agentId,
@@ -71,15 +77,13 @@ app.post('/api/crear-pedido', async (req, res) => {
         const wb = xlsx.utils.book_new();
         xlsx.utils.book_append_sheet(wb, ws, "Pedido");
         
-        // 3. Guardar el archivo Excel en el disco
-        const newFilename = `${folio}.xlsx`; // El nombre del archivo será "5483.xlsx"
-        const finalPath = path.join(finalPathDir, newFilename);
+        const newFilename = `${folio}.xlsx`;
+        const finalPath = path.join(finalPathDir, newFilename); // Usará la ruta /data/pedidos_guardados
         
         xlsx.writeFile(wb, finalPath);
         
         console.log(`Pedido recibido para: ${clientName}. Folio: ${folio}.`);
 
-        // 4. Responder con el nuevo folio
         res.status(201).json({ success: true, folio: folio });
 
     } catch (error) {
@@ -90,5 +94,5 @@ app.post('/api/crear-pedido', async (req, res) => {
 
 // --- Iniciar el servidor ---
 app.listen(port, () => {
-    console.log(`✅ Servidor de pedidos v4.1 (Folio Numérico) escuchando en http://localhost:${port}`);
+    console.log(`✅ Servidor de pedidos v4.2 (Rutas Absolutas) escuchando en http://localhost:${port}`);
 });
