@@ -52,7 +52,7 @@ function getNextFolio() {
     return nextFolio.toString();
 }
 
-// --- Ruta para crear el pedido (sin cambios) ---
+// --- Ruta para crear el pedido ---
 app.post('/api/crear-pedido', async (req, res) => {
     try {
         const { clientName, agentId, clientId, products } = req.body;
@@ -63,8 +63,12 @@ app.post('/api/crear-pedido', async (req, res) => {
         const folio = getNextFolio(); 
         const date = new Date().toLocaleDateString('es-ES');
 
+        // *** CAMBIO AQUÍ: Agregamos cve_suc, cve_mon y lugar mapeándolas desde p (producto) ***
         const dataParaExcel = products.map(p => ({
-            no_ped: folio,
+            no_ped: folio,           // Esta ya la tenías (es el folio del pedido)
+            cve_suc: p.cve_suc,      // <-- NUEVA
+            cve_mon: p.cve_mon,      // <-- NUEVA
+            lugar: p.lugar,          // <-- NUEVA
             f_alta_ped: date,
             cve_cte: clientId,
             cve_age: agentId,
@@ -73,7 +77,11 @@ app.post('/api/crear-pedido', async (req, res) => {
             valor_prod: 0
         }));
         
-        const ws = xlsx.utils.json_to_sheet(dataParaExcel, { header: ["no_ped", "f_alta_ped", "cve_cte", "cve_age", "cve_prod", "cant_prod", "valor_prod"] });
+        // *** CAMBIO AQUÍ: Agregamos las nuevas columnas al array "header" para que Excel las dibuje ***
+        const ws = xlsx.utils.json_to_sheet(dataParaExcel, { 
+            header: ["no_ped", "cve_suc", "cve_mon", "lugar", "f_alta_ped", "cve_cte", "cve_age", "cve_prod", "cant_prod", "valor_prod"] 
+        });
+        
         const wb = xlsx.utils.book_new();
         xlsx.utils.book_append_sheet(wb, ws, "Pedido");
         
@@ -91,7 +99,6 @@ app.post('/api/crear-pedido', async (req, res) => {
         res.status(500).json({ success: false, message: 'Error interno del servidor.' });
     }
 });
-
 // --- Iniciar el servidor ---
 app.listen(port, () => {
     console.log(`✅ Servidor de pedidos v4.2 (Rutas Absolutas) escuchando en http://localhost:${port}`);
