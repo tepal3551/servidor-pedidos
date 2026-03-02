@@ -77,9 +77,9 @@ app.post('/api/crear-pedido', async (req, res) => {
             valor_prod: 0
         }));
         
-        // *** CAMBIO AQUÍ: Agregamos las nuevas columnas al array "header" para que Excel las dibuje ***
+       // *** CAMBIO AQUÍ: Ordenamos las columnas según la captura de pantalla ***
         const ws = xlsx.utils.json_to_sheet(dataParaExcel, { 
-            header: ["no_ped", "cve_suc", "cve_mon", "lugar", "f_alta_ped", "cve_cte", "cve_age", "cve_prod", "cant_prod", "valor_prod"] 
+            header: ["no_ped", "f_alta_ped", "cve_cte", "cve_age", "cve_prod", "cant_prod", "cve_suc", "cve_mon", "lugar", "valor_prod"] 
         });
         
         const wb = xlsx.utils.book_new();
