@@ -74,12 +74,11 @@ app.post('/api/crear-pedido', async (req, res) => {
             cve_age: agentId,
             cve_prod: p.key,
             cant_prod: p.quantity,
-            valor_prod: 0
         }));
         
        // *** CAMBIO AQUÍ: Ordenamos las columnas según la captura de pantalla ***
         const ws = xlsx.utils.json_to_sheet(dataParaExcel, { 
-            header: ["no_ped", "f_alta_ped", "cve_cte", "cve_age", "cve_prod", "cant_prod", "cve_suc", "cve_mon", "lugar", "valor_prod"] 
+            header: ["no_ped", "f_alta_ped", "cve_cte", "cve_age", "cve_prod", "cant_prod", "cve_suc", "cve_mon", "lugar"] 
         });
         
         const wb = xlsx.utils.book_new();
